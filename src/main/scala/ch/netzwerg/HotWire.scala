@@ -1,10 +1,10 @@
-package example
+package ch.netzwerg
 
+import org.scalajs.dom
 import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.extensions.{Color, KeyCode}
 
 import scala.scalajs.js
-import org.scalajs.dom
 
 object HotWire extends js.JSApp {
 
