@@ -12,44 +12,77 @@ object HotWire extends js.JSApp {
   val DarkGreen = Color("#006400")
   val DarkRed = Color("#8B0000")
 
-  var startTime = js.Date.now()
+  var startTime: Option[Double] = None
   var stopTime: Option[Double] = None
 
   def main() {
-    init()
-    dom.onkeypress = (e: KeyboardEvent) => e.keyCode match {
-      case KeyCode.enter => reset()
-      case _ => if (stopTime.isDefined) fail()
-    }
-  }
-
-  def init() {
-    reset()
+    transitionState(reset())
     dom.setInterval(() => jQuery("#stopwatch").text(elapsedTimeFormatted()), 15)
   }
 
+  def transitionState(state: State) {
+    dom.onkeypress = (e: KeyboardEvent) => transitionState(state.onKeyPress(e))
+  }
+
+  def start() = {
+    startTime = Some(js.Date.now())
+    State.Running
+  }
+
+  def reset(): State = {
+    startTime = None
+    stopTime = None
+    setBgColor(DarkGreen)
+    State.Initialized
+  }
+
+  def fail() = {
+    setBgColor(DarkRed)
+    stopTime = Some(js.Date.now())
+    State.Completed
+  }
+
+  def setBgColor(color: Color) {
+    dom.document.body.style.background = color
+  }
+
   def elapsedTimeFormatted() = {
-    val stopTimeOrNow: Double = stopTime.getOrElse(js.Date.now())
-    val elapsed = (stopTimeOrNow - startTime).toLong
+    val now = js.Date.now()
+    val startTimeOrNow = startTime.getOrElse(now)
+    val stopTimeOrNow: Double = stopTime.getOrElse(now)
+    val elapsed = (stopTimeOrNow - startTimeOrNow).toLong
     val mins = (elapsed / (1000 * 60)) % 60
     val secs = (elapsed / 1000) % 60
     val millis = elapsed % 1000
     "%02d:%02d:%03d".format(mins, secs, millis)
   }
 
-  def reset() {
-    startTime = js.Date.now()
-    stopTime = None
-    setBgColor(DarkGreen)
+  abstract class State {
+    def onKeyPress(e: KeyboardEvent): State
   }
 
-  def fail() {
-    stopTime = Some(js.Date.now())
-    setBgColor(DarkRed)
-  }
+  object State {
 
-  def setBgColor(color: Color) {
-    dom.document.body.style.background = color
+    val Initialized = new State {
+      override def onKeyPress(e: KeyboardEvent): State = e.keyCode match {
+        case _ => start()
+      }
+    }
+
+    val Running = new State {
+      override def onKeyPress(e: KeyboardEvent): State = e.keyCode match {
+        case KeyCode.enter => reset()
+        case _ => fail()
+      }
+    }
+
+    val Completed = new State {
+      override def onKeyPress(e: KeyboardEvent): State = e.keyCode match {
+        case KeyCode.enter => reset()
+        case _ => this
+      }
+    }
+
   }
 
 }
