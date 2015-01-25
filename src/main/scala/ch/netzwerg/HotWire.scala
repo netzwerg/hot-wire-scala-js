@@ -10,35 +10,41 @@ import scala.scalajs.js
 object HotWire extends js.JSApp {
 
   val DarkGreen = Color("#006400")
+  val LightGreen = Color("#66FF66")
   val DarkRed = Color("#8B0000")
+
+  def now = Some(js.Date.now())
 
   var startTime: Option[Double] = None
   var stopTime: Option[Double] = None
 
   def main() {
-    transitionState(reset())
+    transitionTo(reset)
     dom.setInterval(() => jQuery("#stopwatch").text(elapsedTimeFormatted()), 15)
   }
 
-  def transitionState(state: State) {
-    dom.onkeypress = (e: KeyboardEvent) => transitionState(state.onKeyPress(e))
+  def transitionTo(state: State) {
+    dom.onkeypress = (e: KeyboardEvent) => transitionTo(state.map(e))
   }
 
-  def start() = {
-    startTime = Some(js.Date.now())
+  def start = {
+    startTime = now
     State.Running
   }
 
-  def reset(): State = {
+  def reset: State = {
     startTime = None
     stopTime = None
     setBgColor(DarkGreen)
     State.Initialized
   }
 
-  def fail() = {
-    setBgColor(DarkRed)
-    stopTime = Some(js.Date.now())
+  def fail = complete(DarkRed)
+  def succeed = complete(LightGreen)
+
+  def complete(color: Color) = {
+    setBgColor(color)
+    stopTime = now
     State.Completed
   }
 
@@ -47,9 +53,8 @@ object HotWire extends js.JSApp {
   }
 
   def elapsedTimeFormatted() = {
-    val now = js.Date.now()
-    val startTimeOrNow = startTime.getOrElse(now)
-    val stopTimeOrNow: Double = stopTime.getOrElse(now)
+    val startTimeOrNow = startTime.getOrElse(now.get)
+    val stopTimeOrNow: Double = stopTime.getOrElse(now.get)
     val elapsed = (stopTimeOrNow - startTimeOrNow).toLong
     val mins = (elapsed / (1000 * 60)) % 60
     val secs = (elapsed / 1000) % 60
@@ -58,27 +63,28 @@ object HotWire extends js.JSApp {
   }
 
   abstract class State {
-    def onKeyPress(e: KeyboardEvent): State
+    def map(e: KeyboardEvent): State
   }
 
   object State {
 
     val Initialized = new State {
-      override def onKeyPress(e: KeyboardEvent): State = e.keyCode match {
-        case _ => start()
+      override def map(e: KeyboardEvent): State = e.keyCode match {
+        case _ => start
       }
     }
 
     val Running = new State {
-      override def onKeyPress(e: KeyboardEvent): State = e.keyCode match {
-        case KeyCode.enter => reset()
-        case _ => fail()
+      override def map(e: KeyboardEvent): State = e.keyCode match {
+        case KeyCode.enter => reset
+        case KeyCode.left => succeed
+        case _ => fail
       }
     }
 
     val Completed = new State {
-      override def onKeyPress(e: KeyboardEvent): State = e.keyCode match {
-        case KeyCode.enter => reset()
+      override def map(e: KeyboardEvent): State = e.keyCode match {
+        case KeyCode.enter => reset
         case _ => this
       }
     }
