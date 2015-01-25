@@ -13,15 +13,13 @@ object HotWire extends js.JSApp {
   val DarkRed = Color("#8B0000")
 
   var startTime = js.Date.now()
+  var stopTime: Option[Double] = None
 
   def main() {
     init()
-    dom.onkeypress = { (e: KeyboardEvent) =>
-      if (e.keyCode == KeyCode.enter) {
-        reset()
-      } else {
-        fail()
-      }
+    dom.onkeypress = (e: KeyboardEvent) => e.keyCode match {
+      case KeyCode.enter => reset()
+      case _ => if (stopTime.isDefined) fail()
     }
   }
 
@@ -31,7 +29,8 @@ object HotWire extends js.JSApp {
   }
 
   def elapsedTimeFormatted() = {
-    val elapsed: Long = (js.Date.now() - startTime).toLong
+    val stopTimeOrNow: Double = stopTime.getOrElse(js.Date.now())
+    val elapsed = (stopTimeOrNow - startTime).toLong
     val mins = (elapsed / (1000 * 60)) % 60
     val secs = (elapsed / 1000) % 60
     val millis = elapsed % 1000
@@ -40,10 +39,12 @@ object HotWire extends js.JSApp {
 
   def reset() {
     startTime = js.Date.now()
+    stopTime = None
     setBgColor(DarkGreen)
   }
 
   def fail() {
+    stopTime = Some(js.Date.now())
     setBgColor(DarkRed)
   }
 
