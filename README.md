@@ -14,4 +14,5 @@ Use `sbt ~fastOptJS` and open `index-fastopt.html` (see underlying [bootstrappin
 Can I play it?
 --------------
 Well, the [MaKey MaKey](http://makeymakey.com) Hot Wire part you need to create yourself, but this indicator is
-deployed [here](http://netzwerg.ch/hotwire) (press any key to mimic the MaKey MaKey, ENTER to reset)
+deployed [here](http://netzwerg.ch/hotwire) (ENTER to reset, LEFT to start, RIGHT to finish; any other key leads to
+failure while running)

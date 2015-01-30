@@ -70,14 +70,15 @@ object HotWire extends js.JSApp {
 
     val Initialized = new State {
       override def map(e: KeyboardEvent): State = e.keyCode match {
-        case _ => start
+        case KeyCode.left => start
+        case _ => this
       }
     }
 
     val Running = new State {
       override def map(e: KeyboardEvent): State = e.keyCode match {
+        case KeyCode.right => succeed
         case KeyCode.enter => reset
-        case KeyCode.left => succeed
         case _ => fail
       }
     }
