@@ -6,6 +6,7 @@ import org.scalajs.dom.extensions.{Color, KeyCode}
 import org.scalajs.jquery.jQuery
 
 import scala.scalajs.js
+import scala.scalajs.js.Dynamic.global
 
 object HotWire extends js.JSApp {
 
@@ -24,7 +25,10 @@ object HotWire extends js.JSApp {
   }
 
   def transitionTo(state: State) {
-    dom.onkeypress = (e: KeyboardEvent) => transitionTo(state.map(e))
+    dom.onkeydown = (e: KeyboardEvent) => {
+      global.console.log("Key " + e.keyCode)
+      transitionTo(state.map(e))
+    }
   }
 
   def start = {
