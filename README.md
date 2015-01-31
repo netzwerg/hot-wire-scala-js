@@ -13,7 +13,7 @@ Can I play it?
 --------------
 This indicator is deployed [here](http://netzwerg.ch/hotwire). The [MaKey MaKey](http://makeymakey.com) Hot Wire part you need to create yourself:
 
-![Hot Wire HowTo](http://netzwerg.ch/images/hotwire-setup.png)
+![Hot Wire HowTo](http://netzwerg.ch/images/hotwire-howto.png)
 
 Pressing **Enter** resets the stop watch. Touching the **left** post starts the clock: While it's running, any touching of the hot wire will trigger a fail, touching the **right** post will complete successfully. Go! 
 
