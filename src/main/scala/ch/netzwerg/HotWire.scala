@@ -53,8 +53,9 @@ object HotWire extends js.JSApp {
   }
 
   def elapsedTimeFormatted() = {
-    val startTimeOrNow = startTime.getOrElse(now.get)
-    val stopTimeOrNow: Double = stopTime.getOrElse(now.get)
+    val nowValue = now.get
+    val startTimeOrNow = startTime.getOrElse(nowValue)
+    val stopTimeOrNow = stopTime.getOrElse(nowValue)
     val elapsed = (stopTimeOrNow - startTimeOrNow).toLong
     val mins = (elapsed / (1000 * 60)) % 60
     val secs = (elapsed / 1000) % 60
@@ -89,7 +90,6 @@ object HotWire extends js.JSApp {
         case _ => this
       }
     }
-
   }
 
 }
