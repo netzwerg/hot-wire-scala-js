@@ -11,9 +11,10 @@ object HotWire extends js.JSApp {
 
   val StopwatchId = "stopwatch"
 
-  val DarkGreen = Color("#006400")
-  val LightGreen = Color("#66FF66")
-  val DarkRed = Color("#8B0000")
+  val IdleColor = Color("#006400")
+  val RunningColor = IdleColor
+  val SuccessColor = Color("#66FF66")
+  val FailColor = Color("#8B0000")
 
   def now = Some(js.Date.now())
   var startTime: Option[Double] = None
@@ -21,7 +22,7 @@ object HotWire extends js.JSApp {
   var stopTime: Option[Double] = None
 
   def main(): Unit = {
-    transitionTo(reset)
+    transitionTo(idle)
     val timeElement = div(id := StopwatchId).render
     document.body.appendChild(timeElement)
     scala.scalajs.js.timers.setInterval(15) {
@@ -35,25 +36,26 @@ object HotWire extends js.JSApp {
     }
   }
 
-  def start = {
+  def idle: State = {
+    startTime = None
+    stopTime = None
+    setBgColor(IdleColor)
+    State.Idle
+  }
+
+  def start: State = {
     startTime = now
+    setBgColor(RunningColor)
     State.Running
   }
 
-  def reset: State = {
-    startTime = None
-    stopTime = None
-    setBgColor(DarkGreen)
-    State.Initialized
-  }
+  def fail = complete(FailColor)
 
-  def fail = complete(DarkRed)
-
-  def succeed = complete(LightGreen)
+  def succeed = complete(SuccessColor)
 
   def complete(color: Color) = {
-    setBgColor(color)
     stopTime = now
+    setBgColor(color)
     State.Completed
   }
 
@@ -78,7 +80,7 @@ object HotWire extends js.JSApp {
 
   object State {
 
-    val Initialized = new State {
+    val Idle = new State {
       override def map(e: KeyboardEvent): State = e.keyCode match {
         case KeyCode.Left => start
         case _ => this
@@ -88,14 +90,14 @@ object HotWire extends js.JSApp {
     val Running = new State {
       override def map(e: KeyboardEvent): State = e.keyCode match {
         case KeyCode.Right => succeed
-        case KeyCode.Enter => reset
+        case KeyCode.Enter => idle
         case _ => fail
       }
     }
 
     val Completed = new State {
       override def map(e: KeyboardEvent): State = e.keyCode match {
-        case KeyCode.Enter => reset
+        case KeyCode.Enter => idle
         case _ => this
       }
     }
